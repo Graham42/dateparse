@@ -789,6 +789,31 @@ var testInputs = []dateTest{
 	{in: " 2018-01-02 17:08:09 -07:00", out: "2018-01-03 00:08:09 +0000 UTC"},
 	{in: "   2018-01-02 17:08:09 -07:00", out: "2018-01-03 00:08:09 +0000 UTC"},
 	{in: "       2018-01-02 17:08:09 -07:00", out: "2018-01-03 00:08:09 +0000 UTC"},
+
+	//syslog RFC3164 formats and non-conformant variants observed in the wild
+	{in: "Apr  9 12:37:24", out: "0000-04-09 12:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24-10", out: "0000-04-09 22:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24-1000", out: "0000-04-09 22:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24 UTC-10", out: "0000-04-09 22:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24 MST", out: "0000-04-09 12:37:24 +0000 UTC", zname: "MST"},
+	{in: "Apr  9 12:37:24 MST-07:00", out: "0000-04-09 19:37:24 +0000 UTC", zname: "MST"},
+	{in: "Apr  9 12:37:24 TZ-10", out: "0000-04-09 22:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24 TZ+02:00", out: "0000-04-09 10:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24+10", out: "0000-04-09 02:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24+10:00", out: "0000-04-09 02:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24 CEST", out: "0000-04-09 12:37:24 +0000 UTC", zname: "CEST"},
+	{in: "Apr  9 12:37:24 CEST+0200", out: "0000-04-09 10:37:24 +0000 UTC", zname: "CEST"},
+	{in: "Apr  9 12:37:24 2025", out: "2025-04-09 12:37:24 +0000 UTC"},
+	{in: "Apr  9 12:37:24 2025 +02:00", out: "2025-04-09 10:37:24 +0000 UTC"},
+	{in: "Apr  9 2025 12:37:24", out: "2025-04-09 12:37:24 +0000 UTC"},
+	{in: "Apr  9 2025 12:37:24 -0700", out: "2025-04-09 19:37:24 +0000 UTC"},
+	//syslog RFC5424 formats and non-conformant variants observed in the wild
+	{in: "2025-04-09T12:37:24Z", out: "2025-04-09 12:37:24 +0000 UTC"},
+	{in: "2025-04-09T12:37:24.123Z", out: "2025-04-09 12:37:24.123 +0000 UTC"},
+	{in: "2025-04-09T12:37:24.123456Z", out: "2025-04-09 12:37:24.123456 +0000 UTC"},
+	{in: "2025-04-09T12:37:24-10:00", out: "2025-04-09 22:37:24 +0000 UTC"},
+	{in: "2025-04-09T12:37:24.123 +0200", out: "2025-04-09 10:37:24.123 +0000 UTC"},
+	{in: "2025-04-09T12:37:24.123456 -0700 MDT", out: "2025-04-09 19:37:24.123456 +0000 UTC", zname: "MDT"},
 }
 
 func TestParse(t *testing.T) {
@@ -1025,6 +1050,8 @@ var testParseErrors = []dateTest{
 	{in: "Fri Jul 3 2015 06:04:07 UTC (GMT", err: true},
 	{in: "Fri Jul 3 2015 06:04:07 PST (Pacific (Daylight) Time)", err: true},
 	{in: "Fri Jul 3 2015 06:04:07 CEST (Central European Summer Time) extra", err: true},
+	// Special TZ indicator must be followed by an offset
+	{in: "Apr  9 12:37:24 TZ", err: true},
 }
 
 func TestParseErrors(t *testing.T) {

@@ -1934,7 +1934,7 @@ iterRunes:
 				switch r {
 				case '+', '-':
 					tzNameLower := strings.ToLower(p.datestr[p.tzi:i])
-					if tzNameLower == "gmt" || tzNameLower == "utc" {
+					if tzNameLower == "gmt" || tzNameLower == "utc" || tzNameLower == "tz" {
 						// This is a special form where the actual timezone isn't UTC, but is rather
 						// specifying that the correct offset is a specified numeric offset from UTC:
 						// 06:20:00 UTC-05
