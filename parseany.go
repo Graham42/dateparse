@@ -171,7 +171,7 @@ func (p *parser) unexpectedTail(tailStart int) error {
 // go 1.20 allows us to convert a byte slice to a string without a memory allocation.
 // See https://github.com/golang/go/issues/53003#issuecomment-1140276077.
 func bytesToString(b []byte) string {
-	if b == nil || len(b) <= 0 {
+	if len(b) <= 0 {
 		return ""
 	} else {
 		return unsafe.String(&b[0], len(b))
@@ -494,7 +494,8 @@ iterRunes:
 				// 12 Feb 2006, 19:17
 				// 12 Feb 2006, 19:17:22
 				// 2013 Jan 06 15:04:05
-				if adjustedI == 4 {
+				switch adjustedI {
+				case 4:
 					p.yeari = p.skip
 					p.yearlen = i - p.skip
 					p.moi = i + 1
@@ -502,9 +503,9 @@ iterRunes:
 						return p, p.unknownErr(datestr)
 					}
 					p.stateDate = dateYearWs
-				} else if adjustedI == 6 {
+				case 6:
 					p.stateDate = dateDigitSt
-				} else {
+				default:
 					p.stateDate = dateDigitWs
 					p.dayi = p.skip
 					p.daylen = i - p.skip
@@ -743,7 +744,8 @@ iterRunes:
 						sepLen = 1
 					}
 					length := i - (p.moi + p.molen + sepLen)
-					if length == 4 {
+					switch length {
+					case 4:
 						p.yearlen = 4
 						p.set(p.yeari, "2006")
 						// We now also know that part1 was the day
@@ -752,7 +754,7 @@ iterRunes:
 						if !p.setDay() {
 							return p, p.unknownErr(datestr)
 						}
-					} else if length == 2 {
+					case 2:
 						// We have no idea if this is
 						// yy-mon-dd   OR  dd-mon-yy
 						// (or for dateDigitDashDigitDash, yy-mm-dd  OR  dd-mm-yy)
@@ -769,7 +771,7 @@ iterRunes:
 						if !p.setDay() {
 							return p, p.unknownErr(datestr)
 						}
-					} else {
+					default:
 						return p, p.unknownErr(datestr)
 					}
 					p.stateTime = timeStart
@@ -1257,8 +1259,8 @@ iterRunes:
 			//        Oct/07/1970
 			//        February/ 7/1970
 			//        February/07/1970
-			switch {
-			case r == ' ':
+			switch r {
+			case ' ':
 				// This could be a weekday or a month, detect and parse both cases.
 				// skip & return to dateStart
 				//   Tue 05 May 2020, 05:05:05
@@ -1296,7 +1298,7 @@ iterRunes:
 					return p, p.unknownErr(datestr)
 				}
 
-			case r == ',':
+			case ',':
 				// Mon, 02 Jan 2006
 				// Monday, 02 Jan 2006
 				if adjustedI >= 3 && p.nextIs(i, ' ') {
@@ -1310,23 +1312,24 @@ iterRunes:
 						return p, p.unknownErr(datestr)
 					}
 				}
-			case r == '.':
+			case '.':
 				// sept. 28, 2017
 				// jan. 28, 2017
 				p.stateDate = dateAlphaPeriodWsDigit
-				if adjustedI == 3 {
+				switch adjustedI {
+				case 3:
 					p.moi = p.skip
 					p.molen = i - p.skip
 					p.set(p.skip, "Jan")
-				} else if adjustedI == 4 {
+				case 4:
 					// gross
 					newDateStr := p.datestr[p.skip:i-1] + p.datestr[i:]
 					putBackParser(p)
 					return parseTime(newDateStr, loc, opts...)
-				} else {
+				default:
 					return p, p.unknownErr(datestr)
 				}
-			case r == '/':
+			case '/':
 				//    X
 				// Oct/ 7/1970
 				// Oct/07/1970
@@ -2032,9 +2035,10 @@ iterRunes:
 				//   timeWsAlphaZoneOffsetWsExtra
 				//     18:04:07 GMT+0100 (GMT Daylight Time)
 				//     18:04:07 GMT+01:00 (GMT Daylight Time)
-				if r == '(' {
+				switch r {
+				case '(':
 					return p, p.unknownErr(datestr)
-				} else if r == ')' {
+				case ')':
 					// must be the end
 					if i != len(p.datestr)-1 {
 						return p, p.unknownErr(datestr)
@@ -2076,11 +2080,12 @@ iterRunes:
 						p.set(i-1, "PM")
 					}
 					p.parsedAMPM = true
-					if p.hourlen == 2 {
+					switch p.hourlen {
+					case 2:
 						p.set(p.houri, "03")
-					} else if p.hourlen == 1 {
+					case 1:
 						p.set(p.houri, "3")
-					} else {
+					default:
 						return p, p.unknownErr(datestr)
 					}
 				} else {
@@ -2519,7 +2524,8 @@ iterRunes:
 			// dateDigitDashDigitDash:
 			//   29-06-2026
 			length := len(p.datestr) - (p.moi + p.molen + 1)
-			if length == 4 {
+			switch length {
+			case 4:
 				p.yearlen = 4
 				p.set(p.yeari, "2006")
 				// We now also know that part1 was the day
@@ -2528,7 +2534,7 @@ iterRunes:
 				if !p.setDay() {
 					return p, p.unknownErr(datestr)
 				}
-			} else if length == 2 {
+			case 2:
 				// We have no idea if this is
 				// yy-mon-dd   OR  dd-mon-yy
 				// (or for dateDigitDashDigitDash, yy-mm-dd  OR  dd-mm-yy)
@@ -2545,7 +2551,7 @@ iterRunes:
 				if !p.setDay() {
 					return p, p.unknownErr(datestr)
 				}
-			} else {
+			default:
 				return p, p.unknownErr(datestr)
 			}
 		}
@@ -2865,37 +2871,40 @@ func (p *parser) set(start int, val string) {
 }
 
 func (p *parser) setMonth() bool {
-	if p.molen == 2 {
+	switch p.molen {
+	case 2:
 		p.set(p.moi, "01")
 		return true
-	} else if p.molen == 1 {
+	case 1:
 		p.set(p.moi, "1")
 		return true
-	} else {
+	default:
 		return false
 	}
 }
 
 func (p *parser) setDay() bool {
-	if p.daylen == 2 {
+	switch p.daylen {
+	case 2:
 		p.set(p.dayi, "02")
 		return true
-	} else if p.daylen == 1 {
+	case 1:
 		p.set(p.dayi, "2")
 		return true
-	} else {
+	default:
 		return false
 	}
 }
 
 func (p *parser) setYear() bool {
-	if p.yearlen == 2 {
+	switch p.yearlen {
+	case 2:
 		p.set(p.yeari, "06")
 		return true
-	} else if p.yearlen == 4 {
+	case 4:
 		p.set(p.yeari, "2006")
 		return true
-	} else {
+	default:
 		return false
 	}
 }
@@ -3016,11 +3025,12 @@ func (p *parser) coalesceTime(end int) bool {
 	// 3:4:5
 	// 15:04:05.00
 	if p.houri > 0 {
-		if p.hourlen == 2 {
+		switch p.hourlen {
+		case 2:
 			p.set(p.houri, "15")
-		} else if p.hourlen == 1 {
+		case 1:
 			p.set(p.houri, "3")
-		} else {
+		default:
 			return false
 		}
 	}
@@ -3028,11 +3038,12 @@ func (p *parser) coalesceTime(end int) bool {
 		if p.minlen == 0 {
 			p.minlen = end - p.mini
 		}
-		if p.minlen == 2 {
+		switch p.minlen {
+		case 2:
 			p.set(p.mini, "04")
-		} else if p.minlen == 1 {
+		case 1:
 			p.set(p.mini, "4")
-		} else {
+		default:
 			return false
 		}
 	}
@@ -3040,11 +3051,12 @@ func (p *parser) coalesceTime(end int) bool {
 		if p.seclen == 0 {
 			p.seclen = end - p.seci
 		}
-		if p.seclen == 2 {
+		switch p.seclen {
+		case 2:
 			p.set(p.seci, "05")
-		} else if p.seclen == 1 {
+		case 1:
 			p.set(p.seci, "5")
-		} else {
+		default:
 			return false
 		}
 	}

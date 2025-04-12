@@ -6,7 +6,7 @@ Go Date Parser
 
 Parse date/time strings without knowing the format in advance. Supports 100+ formats. Validates comprehensively to avoid false positives.  Very fast (~single-pass state-machine based approach).  See [bench_test.go](https://github.com/itlightning/dateparse/blob/main/bench_test.go) for performance comparison. See the critical note below about timezones.
 
-⚡ Maintained by [IT Lightning](https://itlightning.com/), a cloud-first logging platform that's uniquely powerful, super-easy (schemaless, point-and-shoot ingestion), and affordable. It automatically extracts and classifies structured data out of your unstructured log messages. Enjoy visual pattern-analysis and robust SQL-like search. It's unique architecture means you can log more and pay less. Check it out and give us feedback! ⚡
+⚡ Maintained by [SparkLogs](https://sparklogs.com/), a cloud-first logging platform that's uniquely powerful, super-easy (schemaless, point-and-shoot ingestion), and affordable. It automatically extracts and classifies structured data out of your unstructured log messages. Enjoy visual pattern-analysis and robust SQL-like search. It's unique architecture means you can log more and pay less. Check it out and give us feedback! SparkLogs is developed by [IT Lightning](https://itlightning.com/). ⚡
 
 🐛💡 Find a bug or have an idea with this package? [Issues](https://github.com/itlightning/dateparse/issues) and pull requests are welcome.
 
@@ -75,6 +75,14 @@ cli tool for testing dateformats
 
 [Date Parse CLI](https://github.com/itlightning/dateparse/tree/main/dateparse)
 
+Running the tests
+----------------------------------
+
+Make sure for your Linux distribution you've installed the relevant package that includes older timezone name links (e.g., `US/Pacific`). For example, on Ubuntu:
+
+```bash
+sudo apt install tzdata-legacy
+```
 
 Extended example
 -------------------
