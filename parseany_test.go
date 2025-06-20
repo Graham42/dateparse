@@ -710,6 +710,9 @@ var testInputs = []dateTest{
 	{in: "2009-08-12T22:15:09.9999Z", out: "2009-08-12 22:15:09.9999 +0000 UTC"},
 	{in: "2009-08-12T22:15:09.99999999Z", out: "2009-08-12 22:15:09.99999999 +0000 UTC"},
 	{in: "2009-08-12T22:15:9.99999999Z", out: "2009-08-12 22:15:09.99999999 +0000 UTC"},
+	//    mm-dd-yyyy
+	{in: "11-30-2022", out: "2022-11-30 00:00:00 +0000 UTC", expectAmbiguous: false},
+	{in: "12-12-2022", out: "2022-12-12 00:00:00 +0000 UTC", expectAmbiguous: true},
 	// yyyy.mm
 	{in: "2014", out: "2014-01-01 00:00:00 +0000 UTC"},
 	{in: "2014.05", out: "2014-05-01 00:00:00 +0000 UTC"},
@@ -1125,10 +1128,16 @@ func TestParseLayout(t *testing.T) {
 var testParseStrict = []dateTest{
 	//   dd-mon-yy  13-Feb-03
 	{in: "03-03-14", err: true, expectAmbiguous: true},
+	//    dd-mm-yyyy
+	{in: "30-11-2022", out: "2022-11-30 00:00:00 +0000 UTC"}, // the day is larger than 12, so it is not ambiguous
 	//   mm.dd.yyyy
 	{in: "3.3.2014", err: true, expectAmbiguous: true},
 	//   mm.dd.yy
 	{in: "08.09.71", err: true, expectAmbiguous: true},
+	//    mm-dd-yyyy
+	{in: "03-02-2014", err: true, expectAmbiguous: true},
+	{in: "12-12-2022", err: true, expectAmbiguous: true},
+	{in: "11-30-2022", out: "2022-11-30 00:00:00 +0000 UTC"}, // the day is larger than 12, so it is not ambiguous
 	//  mm/dd/yyyy
 	{in: "3/5/2014", err: true, expectAmbiguous: true},
 	//  mm/dd/yy
